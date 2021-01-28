@@ -1,16 +1,15 @@
 
-library(scales)
-
 server <- function(input, output) {
   
   #________________________________________________________________________
   
-  # Prelim calculations ----
+  # calculations ----
   #________________________________________________________________________
-  
   # specify savings per mo until retiring # ASSUMES PAYING MORTGAGE RIGHT UP TO RETIREMENT AGE
   savings_per_mo_pre_ret = 
-    reactive({input$income - input$mortgage - input$expenses})
+    reactive({monthly_take_home_pay(input$income_e, input$ks_e) + 
+        monthly_take_home_pay(input$income_j, input$ks_j) -
+        input$mortgage - input$expenses})
 
   # Specify expenses per mo in retirement. THIS ASSUMES NO MORTGAGE BY RETIREMENT AGE, ALSO PENSION IMMEDIATELY. BUT THIS IS INCORRECT IF WE RETIRE EARLY ENOUGH!
   expenses_per_mo_post_ret =
@@ -27,7 +26,11 @@ server <- function(input, output) {
 
   # years to achieve savings target
   years = reactive({
-    savings_target() / (savings_per_mo_pre_ret() * 12)
+    if(savings_per_mo_pre_ret() > 0) {
+      savings_target() / (savings_per_mo_pre_ret() * 12)  
+    } else {
+      Inf
+    }
   })
   
   #________________________________________________________________________
