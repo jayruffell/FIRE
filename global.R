@@ -4,6 +4,14 @@ rm(list=ls())
 library(scales)
 library(dplyr)
 
+# function to calculate what goes into KS monthly, after tax
+kiwisaver_monthly = function(salary, ks_rate) {
+  # employee contirubtion - no taxing reqd cos already taxed via PAYE
+  (salary*(ks_rate/100) +
+     # employer contribution - have to tax separately - assuming 33% rate
+     salary*0.03*.67) / 12
+} 
+
 # function to calculate take-home pay per month from income
 monthly_take_home_pay = function(salary, kiwisaver){
   

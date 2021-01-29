@@ -5,10 +5,15 @@ server <- function(input, output) {
   
   # calculations ----
   #________________________________________________________________________
-  # specify savings per mo until retiring # ASSUMES PAYING MORTGAGE RIGHT UP TO RETIREMENT AGE
+  # specify after-tax savings per mo until retiring - to invest, if stocks_inflation_rate is >1 # ASSUMES PAYING MORTGAGE RIGHT UP TO RETIREMENT AGE
   savings_per_mo_pre_ret = 
+    # take home pay
     reactive({monthly_take_home_pay(input$income_e, input$ks_e) + 
-        monthly_take_home_pay(input$income_j, input$ks_j) -
+        monthly_take_home_pay(input$income_j, input$ks_j) +
+        # kiwisaver post-tax
+        kiwisaver_monthly(input$income_e, input$ks_e) +
+        kiwisaver_monthly(input$income_j, input$ks_j) -
+        # expenses
         input$mortgage - input$expenses})
 
   # Specify expenses per mo in retirement. THIS ASSUMES NO MORTGAGE BY RETIREMENT AGE, ALSO PENSION IMMEDIATELY. BUT THIS IS INCORRECT IF WE RETIRE EARLY ENOUGH!
@@ -27,9 +32,9 @@ server <- function(input, output) {
   # years to achieve savings target
   years = reactive({
     if(savings_per_mo_pre_ret() > 0) {
-      savings_target() / (savings_per_mo_pre_ret() * 12)  
+      round(savings_target() / (savings_per_mo_pre_ret() * 12), 0)
     } else {
-      Inf
+      'NEVER :('
     }
   })
   
@@ -42,6 +47,6 @@ server <- function(input, output) {
   output$exp_per_mo = renderText(comma(expenses_per_mo_post_ret()))
   output$ass_reqd = renderText(comma(assets_target()))
   output$sav_reqd = renderText(comma(savings_target()))
-  output$years = renderText(comma(years()))
+  output$years = renderText(years())
   
 }

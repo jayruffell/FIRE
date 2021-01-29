@@ -1,8 +1,11 @@
 # Tax notes:
-# - KS is deducted pre-tax, but your PAYE is calcd on all earnings
+# - KS employee contributions deducted pre-tax, but your PAYE is calcd on all earnings. KS employer contributions are post-tax. So for Jay employee contributions showing up in KS account might be $300 per month whereas employer would be $200 per month - cos theirs is getting taxed before going in, whereas mine already accounted for in PAYE.
 # - KS earnings taxed at PIR of 28% if income <48K. Note PIR for other investments may be much lower once retired? If investments < 48K then 10.5%; if <70K then 17.5%. Also things get complicated as to whether you pay tax on *dividends* vs *capital gains* of shares, see here for deets https://moneykingnz.com/what-taxes-do-you-need-to-pay-on-your-investments-in-new-zealand/
 
 
+#-------------------------------------------------------------------
+# OTHER NOTES
+# should i consider that any savings beyond buying house are earning interest? e.g. straight into ks?
 #-------------------------------------------------------------------
 
 # TO DO 
@@ -39,7 +42,6 @@ ui <- fluidPage(
       numericInput(inputId = "income_e",
                    label = "Emily's salary:",
                    value = 80000),
-
       numericInput(inputId = "ks_e",
                    label = "Emily's Kiwisaver rate (%):",
                    value = 3),
@@ -58,6 +60,12 @@ ui <- fluidPage(
       numericInput(inputId = "withdrawal_rate",
                    label = "Annual withdrawal rate (%):",
                    value = 3), # 4% often advocated for US, 2.5-3% for UK. See  https://moneyed.co.uk/blog/intro_to_fire. Also, from https://en.wikipedia.org/wiki/Trinity_study see criticicms, e.g.: Laurence Kotlikoff, advocate of the consumption smoothing theory of retirement planning, is even less kind to the 4% rule, saying that it "has no connection to economics.... economic theory says you need to adjust your spending based on the portfolio of assets you're holding. If you invest aggressively, you need to spend defensively. Notice that the 4 percent rule has no connection to the other rule—to target 85 percent of your preretirement income. The whole thing is made up out of the blue."[7]
+      numericInput(inputId = "stocks_inflation_rate",
+                   label = "Investments growth rate (%):",
+                   value = 4), # need to factor in tax (28% on PIE earnings, e.g. KS), inflation? others? Or will inflation get built into total saving amount, e..g change to real dollar terms 
+      numericInput(inputId = "retirement_spend_rate",
+                   label = "Retirement spend rate (%):",
+                   value = 85),
       numericInput(inputId = "retirement_spend_rate",
                    label = "Retirement spend rate (%):",
                    value = 85),
@@ -71,7 +79,7 @@ ui <- fluidPage(
       
       numericInput(inputId = "kiwisaver",
                    label = "Current kiwisaver amount:",
-                   value = 30000),
+                   value = 70000),
       numericInput(inputId = "house_downsizing_payoff",
                    label = "downsizing:",
                    value = 0)
