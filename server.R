@@ -5,7 +5,8 @@ server <- function(input, output) {
   
   # calculations ----
   #________________________________________________________________________
-  # specify after-tax savings per mo until retiring - to invest, if stocks_inflation_rate is >1 # ASSUMES PAYING MORTGAGE RIGHT UP TO RETIREMENT AGE
+  
+  # specify after-tax savings per mo until retiring - to invest, if stocks_inflation_rate is =! 0 # ASSUMES PAYING MORTGAGE RIGHT UP TO RETIREMENT AGE
   savings_per_mo_pre_ret = 
     # take home pay
     reactive({monthly_take_home_pay(input$income_e, input$ks_e) + 
@@ -24,17 +25,54 @@ server <- function(input, output) {
   assets_target = reactive({
     (1/(input$withdrawal_rate/100)) * 12 * expenses_per_mo_post_ret()
   })
-
-  # specify total amount to save to hit assets target
-  savings_target =
-    reactive({assets_target() - input$kiwisaver - input$house_downsizing_payoff})
+  
+  #++++++++++++
+  # calculate value of investments over 30yr time horizon
+  #++++++++++++
+  
+  # create discrete points using a loop & equations
+  investments_over_time =
+    reactive({
+      finaldf = data.frame(year = 1:30, investment_value=NA)
+  for(i in 1:nrow(finaldf)){
+    finaldf$investment_value[i] =
+      investment_value_after_n_yrs(initial = input$kiwisaver_current,
+                                   annual_payments = (savings_per_mo_pre_ret()*12),
+                                   percent_growth = input$stocks_inflation_rate,
+                                   yrs = finaldf$year[i])
+  }
+      return(finaldf)
+    })
+  
+  # # model the above df to be able to predict when we can retire
+  # years2 = reactive({
+  #   # nothing fits well - so use AIC to build a really flexible model
+  #   expSeq = seq(1, 3, by=0.01)
+  #   aicVec = vector()
+  #   for(i in 1:length(expSeq)) {
+  #    mod_i =  lm(investment_value ~ year^expSeq, data=investments_over_time())
+  #   }
+  #   # mymod = lm(investment_value ~ log(year), data=investments_over_time())
+  #   # updated = investments_over_time() %>%
+  #     mutate(preds = predict(mymod))
+  #   # filter down to predicted year closest to 
+  #   
+  #   return(updated)
+  # })
 
   # years to achieve savings target
   years = reactive({
-    if(savings_per_mo_pre_ret() > 0) {
-      round(savings_target() / (savings_per_mo_pre_ret() * 12), 0)
+    
+    # first check if we never reach target, and if so use 10000yrs as a flag 
+    if(max(investments_over_time()$investment_value) <
+       assets_target()) {
+      return(Inf)
     } else {
-      'NEVER :('
+      closestYear = investments_over_time() %>%
+        mutate(target = assets_target()) %>%
+        mutate(diff = investment_value-target) %>%     
+        filter(abs(diff)==min(abs(diff)))
+      return(closestYear$year)
     }
   })
   
@@ -46,7 +84,12 @@ server <- function(input, output) {
   output$sav_per_mo = renderText(comma(savings_per_mo_pre_ret()))
   output$exp_per_mo = renderText(comma(expenses_per_mo_post_ret()))
   output$ass_reqd = renderText(comma(assets_target()))
-  output$sav_reqd = renderText(comma(savings_target()))
   output$years = renderText(years())
-  
+  output$plot = renderPlot({
+    investments_over_time() %>%
+      ggplot(aes(year, investment_value)) + geom_line() +
+      geom_abline(slope=0, intercept=assets_target()) +
+      ylim(min(investments_over_time()$investment_value),
+           assets_target()*1.5)
+  })
 }

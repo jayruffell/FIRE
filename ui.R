@@ -9,12 +9,9 @@
 #-------------------------------------------------------------------
 
 # TO DO 
-# add in annual salary increase
-# figure out if I'm accounting for tax on investments when working out if they cover expenses? Does the 4% inc tax? See above for NZ PIR rates
-# add in kiwisaver growth (3% of income)
+# think about whether investment interest needs to be monthly - currently added annually. make a difference?
+# allow for using up all savings + reverse mortgage
 # loan amont paid off, possibly converting to % value of current house after additional input for house inflation. amortisation rate could come from here - mortgage: at a given no. of periods, interest rate, and principal value, how much will be left on loan? possibly here for rearranging?  n=−log(1−rPVPMT)log(1+r) from https://math.stackexchange.com/questions/2265192/solve-for-n-for-loan-amortization?
-# nice rounding
-# allow for reverse mortgage
 # factor in Deflation of savings per Ec Explained
 
 # -------------------------------------------------------------------
@@ -38,19 +35,27 @@ ui <- fluidPage(
       #++++++++++++++
       # initial values
       #++++++++++++++
-      
+      h4('Income'), 
       numericInput(inputId = "income_e",
                    label = "Emily's salary:",
                    value = 80000),
-      numericInput(inputId = "ks_e",
-                   label = "Emily's Kiwisaver rate (%):",
-                   value = 3),
       numericInput(inputId = "income_j",
                    label = "Jay's salary:",
                    value = 120000),
+      numericInput(inputId = "ks_e",
+                   label = "Emily's Kiwisaver rate (%):",
+                   value = 3),
       numericInput(inputId = "ks_j",
                    label = "Jay's Kiwisaver rate (%):",
                    value = 3),
+      numericInput(inputId = "kiwisaver_current",
+                   label = "Current kiwisaver amount:",
+                   value = 70000),
+      numericInput(inputId = "stocks_inflation_rate",
+                   label = "Investment growth rate (%):",
+                   value = 4), # need to factor in tax (28% on PIE earnings, e.g. KS), inflation? others? Or will inflation get built into total saving amount, e..g change to real dollar terms 
+      br(),
+      h4('Expenses'),
       numericInput(inputId = "mortgage",
                    label = "Monthly expenses - mortgage:",
                    value = 2900),
@@ -60,29 +65,14 @@ ui <- fluidPage(
       numericInput(inputId = "withdrawal_rate",
                    label = "Annual withdrawal rate (%):",
                    value = 3), # 4% often advocated for US, 2.5-3% for UK. See  https://moneyed.co.uk/blog/intro_to_fire. Also, from https://en.wikipedia.org/wiki/Trinity_study see criticicms, e.g.: Laurence Kotlikoff, advocate of the consumption smoothing theory of retirement planning, is even less kind to the 4% rule, saying that it "has no connection to economics.... economic theory says you need to adjust your spending based on the portfolio of assets you're holding. If you invest aggressively, you need to spend defensively. Notice that the 4 percent rule has no connection to the other rule—to target 85 percent of your preretirement income. The whole thing is made up out of the blue."[7]
-      numericInput(inputId = "stocks_inflation_rate",
-                   label = "Investments growth rate (%):",
-                   value = 4), # need to factor in tax (28% on PIE earnings, e.g. KS), inflation? others? Or will inflation get built into total saving amount, e..g change to real dollar terms 
-      numericInput(inputId = "retirement_spend_rate",
-                   label = "Retirement spend rate (%):",
-                   value = 85),
+      br(),
+      h4('Post-retirement'),
       numericInput(inputId = "retirement_spend_rate",
                    label = "Retirement spend rate (%):",
                    value = 85),
       numericInput(inputId = "pension",
                    label = "Monthly after-tax pension:",
-                   value = 2600),
-      
-      #++++++++++++++
-      # current assets
-      #++++++++++++++
-      
-      numericInput(inputId = "kiwisaver",
-                   label = "Current kiwisaver amount:",
-                   value = 70000),
-      numericInput(inputId = "house_downsizing_payoff",
-                   label = "downsizing:",
-                   value = 0)
+                   value = 2600)
     ),
     
     #________________________________________________________________________
@@ -101,11 +91,11 @@ ui <- fluidPage(
       hr('Assets required to provide retirement expenses perpetually:'),
       textOutput('ass_reqd', inline=T),
       br(),
-      hr('Total amount to save:'),
-      textOutput('sav_reqd', inline=T),
-      br(),
       hr('Years to achieve:'),
       textOutput('years', inline=T),
+      br(),
+      hr('Investments over time:'),
+      plotOutput('plot')
     )
   )
 )
