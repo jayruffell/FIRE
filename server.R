@@ -128,9 +128,12 @@ server <- function(input, output) {
   output$sav_per_mo = renderText(comma(savings_per_mo_pre_ret()))
   output$exp_per_mo = renderText(comma(expenses_per_mo_post_ret()))
   output$ass_reqd = renderText(comma(assets_target()))
-  output$years = renderText(years())
-  output$homeloan = renderText(comma(mortgagedf()$final_balance))
-  output$house_val = renderText(round(mortgagedf()$house_prop, 0))
+  output$years = renderText({
+    if(years() == Inf) 'YOU WILL WORK UNTIL YOU DIE'  else years()})
+  output$homeloan = renderText({
+    if(years() == Inf) 'YOU WILL WORK UNTIL YOU DIE'  else comma(mortgagedf()$final_balance)})
+  output$house_val = renderText({
+    if(years() == Inf) 'YOU WILL WORK UNTIL YOU DIE'  else round(mortgagedf()$house_prop, 0)})  
   output$plot = renderPlot({
     investments_over_time() %>%
       ggplot(aes(year, investment_value)) + geom_line() + 
