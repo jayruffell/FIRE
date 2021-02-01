@@ -21,7 +21,7 @@ server <- function(input, output) {
         input$mortgage - input$expenses})
 
   #++++++++++++
-  # Specify expenses per mo in retirement. THIS ASSUMES NO MORTGAGE BY RETIREMENT AGE, ALSO PENSION IMMEDIATELY. BUT THIS IS INCORRECT IF WE RETIRE EARLY ENOUGH!
+  # Specify expenses per mo in retirement. ASSUMES PENSION IMMEDIATELY. BUT THIS IS INCORRECT IF WE RETIRE EARLY ENOUGH!
   #++++++++++++
   
   expenses_per_mo_post_ret =
@@ -136,11 +136,12 @@ server <- function(input, output) {
     if(years() == Inf) 'YOU WILL WORK UNTIL YOU DIE'  else round(mortgagedf()$house_prop, 0)})  
   output$plot = renderPlot({
     investments_over_time() %>%
-      ggplot(aes(year, investment_value)) + geom_line() + 
-      geom_abline(slope=0, intercept=assets_target()) +
+      ggplot(aes(year, investment_value)) + geom_line(colour='dark blue') + 
+      geom_abline(slope=0, intercept=assets_target(), colour='black') +
       ylim(min(investments_over_time()$investment_value),
            assets_target()*1.5) +
       scale_y_continuous(labels=scales::dollar_format()) +
+      annotate('text', y=assets_target(), vjust=-1, x=5, label='Target value') +
       ylab('Value of investments') + xlab('Years hence')
   })
 }
