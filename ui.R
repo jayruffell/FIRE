@@ -21,6 +21,7 @@
 # factor in that pension won't be paid pre-65 - also allow for post-retirment salary for x years? OR have printout 'you will need to earn salary of $xxx until 65 to cover mortgage payments + pension, assuming mortgage paid off at 65  (cos mortgage is due to be paid off right when we retire)'
 # think about whether investment interest needs to be monthly - currently added annually. make a difference?
 # think about whether i'm accurate enough on how i've calcd mortgage amount owing - based on flat 2900 payments c.f. varying with interested rate based on 30y term
+# incorporate volatility in value of portfolio? simulating market crash etc.
 
 
 # -------------------------------------------------------------------
